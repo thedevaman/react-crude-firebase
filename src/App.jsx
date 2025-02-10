@@ -16,11 +16,18 @@ const App = ()=>{
 
   const[employees,setEmployees] = useState(model)
   const[isEmpty,setIsEmpty] = useState(false)
+  const[employeeData,setEmployeeData] = useState([])
 
   useEffect(()=>{
   const req = async ()=>{
    const fetchdata = await getDocs(collection(db,"employees"))
    setIsEmpty(fetchdata.empty)
+   let temp=[]
+   fetchdata.forEach((doc)=>{
+    const documents = doc.data()
+    temp.push(documents)
+   })
+   setEmployeeData(temp)
   }
   req()
   },[isEmpty])
@@ -40,6 +47,9 @@ const createEmployee = async (e)=>{
   e.preventDefault()
  const snapshot = await addDoc(collection(db,"employees"),employees);
  setIsEmpty(false);
+ setEmployeeData([...employeeData,
+  employees
+ ])
  new Swal({
   icon:'success',
   title:'Success',
@@ -62,8 +72,8 @@ const createEmployee = async (e)=>{
   return (
     <div className="flex flex-col items-center gap-16">
       <h1 className="text-5xl font-bold">Firebase <span className="text-indigo-600">Crud</span></h1>
-      <div className="grid grid-cols-2 w-6/12 gap-16">
-        <div>
+      <div className="flex w-11/12 gap-16">
+        <div className='w-[400px]'>
           <form className="space-y-4" onSubmit={createEmployee}>
           <div className="flex flex-col">
             <label className="font-semibold text-lg mb-2">Employee Name</label>
@@ -98,7 +108,7 @@ const createEmployee = async (e)=>{
 
           </form>
         </div>
-        <div>
+        <div className='flex-1'>
           {
             isEmpty && 
             <div className='flex flex-col items-center'>
@@ -106,6 +116,37 @@ const createEmployee = async (e)=>{
             <h1 className='text-3xl font-semibold text-gray-500'>Empty</h1>
           </div>
           }
+          <h1 className='text-2xl font-semibold'>Employees</h1>
+          <table className='w-full mt-8'>
+            <thead>
+              <tr className="bg-rose-600 text-white text-left">
+                <th className='py-2 pl-2'>Sr no.</th>
+                <th>Employee Name</th>
+                <th>Salary</th>
+                <th>Joining Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+             {
+              employeeData.map((item,index)=>(
+                <tr key={index} className='border-b border-gray-300'>
+                <td className='pl-2 py-2'>{index+1}</td>
+                <td>{item.employeeName}</td>
+                <td>{item.salary}</td>
+                <td>{item.joiningDate}</td>
+                <td>
+                  <div>
+                    <button>
+                      <i className="ri-file-edit-line"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              ))
+             }
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
